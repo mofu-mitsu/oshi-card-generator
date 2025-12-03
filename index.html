@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- メタタグ・OGP設定 -->
+    <title>推し名刺ジェネレーター</title>
+    <meta name="description" content="量産・地雷・サブカル対応！推し担当カラーの名刺を作って自己紹介しよう♡">
+    
+    <meta property="og:title" content="推し名刺ジェネレーター">
+    <meta property="og:description" content="あなたの「推し担当」名刺を作ろう！量産・地雷・サブカルデザイン対応♡">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mofu-mitsu.github.io/oshi-card-generator/">
+    <meta property="og:image" content="https://mofu-mitsu.github.io/oshi-card-generator/ogp.png">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <!-- ファビコン -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎀</text></svg>">
+
+    <!-- ライブラリ読み込み -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- フォント読み込み -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+Rounded+1c:wght@400;800&family=Potta+One&family=Zen+Old+Mincho:wght@700&display=swap');
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            /* 背景を可愛いピンクのドット柄に変更 */
+            background-color: #fff0f5; 
+            background-image: radial-gradient(#ffdde1 20%, transparent 20%), radial-gradient(#ffdde1 20%, transparent 20%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            
+            color: #555;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* タイトルを囲って可愛く強調 */
+        h1 {
+            color: #ff8ba7;
+            font-family: 'Potta One', cursive;
+            font-size: 1.6rem;
+            text-align: center;
+            
+            /* ステッチ風の枠線と背景 */
+            background: #fff;
+            padding: 15px 25px;
+            border-radius: 50px;
+            border: 3px dashed #ffb7c5;
+            box-shadow: 0 4px 0 rgba(255, 183, 197, 0.4);
+            
+            margin-bottom: 10px;
+            display: inline-block;
+            max-width: 90%;
+            line-height: 1.4;
+            text-shadow: none;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+            align-items: flex-start;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        /* --- 入力エリア --- */
+        .editor {
+            flex: 1;
+            min-width: 280px;
+            background: #fff;
+            padding: 25px;
+            border-radius: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+            border: 1px solid #fff0f5;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #d65d7a;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background: #fafafa;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #ffb7c5;
+            background: #fffbfc;
+        }
+
+        /* ファイル選択ボタンのカスタマイズ */
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #fff0f5;
+            color: #d65d7a;
+            border: 2px dashed #ffb7c5;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .file-upload-label:hover {
+            background: #ffe6ee;
+            border-color: #ff8ba7;
+            transform: translateY(-2px);
+        }
+
+        .file-name-display {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-top: 5px;
+            display: block;
+            text-align: center;
+        }
+
+        .color-pickers {
+            display: flex;
+            gap: 15px;
+        }
+
+        .color-group {
+            flex: 1;
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 45px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            padding: 0;
+            background: none;
+        }
+
+        /* --- プレビューエリア --- */
+        .preview-area {
+            flex: 1;
+            min-width: 320px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        #meishi-card {
+            width: 340px;
+            height: 200px; 
+            background-color: #fff;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            overflow: hidden;
+            border-radius: 0;
+            padding: 25px 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            --main-color: #ffb7c5;
+            --sub-color: #fff0f5; 
+            --text-color: #555;
+            --accent-font: 'M PLUS Rounded 1c', sans-serif;
+            transform-style: preserve-3d;
+        }
+
+        /* === スタイル別の装飾クラス === */
+        
+        /* 1. 量産型 (Sweet) - チェック柄 */
+        #meishi-card.style-sweet {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            border-radius: 20px;
+            border: 5px solid var(--main-color);
+            background-color: #fff;
+            /* 白と薄い色の塗りつぶしチェック（ノイズ対策） */
+            background-image: 
+                linear-gradient(45deg, var(--sub-color) 25%, #ffffff 25%, #ffffff 75%, var(--sub-color) 75%, var(--sub-color)), 
+                linear-gradient(45deg, var(--sub-color) 25%, #ffffff 25%, #ffffff 75%, var(--sub-color) 75%, var(--sub-color));
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+        
+        #meishi-card.style-sweet .deco-tl,
+        #meishi-card.style-sweet .deco-br {
+            position: absolute;
+            font-size: 1.8rem;
+            color: var(--main-color);
+            opacity: 0.8;
+            z-index: 10;
+        }
+        #meishi-card.style-sweet .deco-tl { top: -5px; left: -5px; transform: rotate(-45deg); content: '🎀'; }
+        #meishi-card.style-sweet .deco-br { bottom: -5px; right: -5px; transform: rotate(135deg); content: '🎀'; }
+
+        /* 2. 地雷系 (Gothic) - 黒無地 */
+        #meishi-card.style-gothic {
+            font-family: 'Zen Old Mincho', serif;
+            border-radius: 6px;
+            background-color: #111;
+            background-image: none; /* 柄なし */
+            border: 2px solid var(--main-color);
+            color: var(--main-color);
+        }
+        #meishi-card.style-gothic::after {
+            content: '';
+            position: absolute;
+            top: 5px; left: 5px; right: 5px; bottom: 5px;
+            border: 1px dashed var(--main-color);
+            pointer-events: none;
+        }
+        #meishi-card.style-gothic .deco-tr {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 1.5rem;
+            color: var(--main-color);
+            content: '✝';
+        }
+        #meishi-card.style-gothic .name-area {
+            text-shadow: 0 0 5px var(--main-color);
+        }
+
+        /* 3. サブカル (Cyber) - 白無地・ドットなし */
+        #meishi-card.style-cyber {
+            font-family: 'DotGothic16', sans-serif;
+            border-radius: 10px;
+            background-color: #fff;
+            border-bottom: 10px solid var(--main-color);
+            background-image: none; /* ドット削除 */
+        }
+        #meishi-card.style-cyber .deco-sticker {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: #000;
+            color: #fff;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            transform: rotate(5deg);
+        }
+
+        /* --- 名刺の中身レイアウト --- */
+        .meishi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 5px;
+            position: relative;
+            z-index: 2;
+            padding-left: 10px; 
+            padding-right: 10px;
+        }
+
+        .role-badge {
+            font-size: 0.7rem;
+            background: var(--main-color);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .oshi-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-color);
+        }
+        
+        .style-gothic .oshi-name { color: var(--main-color); }
+        .style-gothic .role-badge { background: #333; color: var(--main-color); border: 1px solid var(--main-color); }
+
+        .main-content {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            padding: 0 10px;
+        }
+
+        .my-icon {
+            width: 60px;
+            height: 60px;
+            background: #eee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+            background-color: var(--main-color);
+            overflow: hidden;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .my-icon img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+
+        .text-info {
+            flex: 1;
+        }
+
+        .my-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+        
+        .style-gothic .my-name { color: #fff; }
+
+        .intro-text {
+            font-size: 0.65rem;
+            line-height: 1.4;
+            color: #777;
+            white-space: pre-wrap;
+        }
+        .style-gothic .intro-text { color: #ccc; }
+
+        .sns-id {
+            margin-top: 8px;
+            font-size: 0.7rem;
+            color: var(--main-color);
+            font-weight: bold;
+        }
+
+        .deco-tl, .deco-br, .deco-tr, .deco-sticker { display: none; }
+        .style-sweet .deco-tl, .style-sweet .deco-br { display: block; }
+        .style-gothic .deco-tr { display: block; }
+        .style-cyber .deco-sticker { display: block; }
+
+        .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: white;
+        }
+        
+        button:active { transform: scale(0.96); }
+
+        #btn-save { 
+            background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            box-shadow: 0 4px 15px rgba(255, 154, 158, 0.4);
+        }
+        #btn-share { 
+            background: #444; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .footer-content {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .backtop a {
+            color: #d65d7a;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        #longpressSaveArea { display: none; margin-top: 20px; text-align: center; }
+
+        @media (max-width: 600px) {
+            .container { flex-direction: column; align-items: center;}
+            .editor, .preview-area { width: 100%; max-width: 320px; }
+            #meishi-card { transform: scale(0.9); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎀 推し名刺ジェネレーター</h1>
+    <p class="subtitle">担当カラーで最強の自己紹介カードを作ろう！</p>
+
+    <div class="container">
+        <!-- 入力エリア -->
+        <div class="editor">
+            <div class="input-group">
+                <label><i class="fa-solid fa-palette"></i> デザインの系統</label>
+                <select id="input-style">
+                    <option value="style-sweet">量産型（Sweet）</option>
+                    <option value="style-gothic">地雷系（Gothic）</option>
+                    <option value="style-cyber">サブカル（Cyber）</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fa-solid fa-eye-dropper"></i> 推しの担当カラー</label>
+                <div class="color-pickers">
+                    <div class="color-group">
+                        <input type="color" id="input-color" value="#ffb7c5">
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fa-solid fa-heart"></i> 推しの名前（右上）</label>
+                <!-- placeholder変更 -->
+                <input type="text" id="input-oshi" placeholder="推しの名前">
+            </div>
+
+            <div class="input-group">
+                <label><i class="fa-solid fa-tag"></i> 自分の肩書き</label>
+                <input type="text" id="input-role" placeholder="〇〇くん担当 / 同担拒否">
+            </div>
+
+            <div class="input-group">
+                <label><i class="fa-solid fa-user"></i> 自分の名前</label>
+                <!-- placeholder変更 -->
+                <input type="text" id="input-myname" placeholder="名前">
+            </div>
+
+            <div class="input-group">
+                <label><i class="fa-solid fa-pen"></i> 自己紹介・ひとこと</label>
+                <textarea id="input-intro" rows="3" placeholder="推しへの愛や、活動スタイルを書いてね！"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fa-brands fa-twitter"></i> X(Twitter) ID</label>
+                <input type="text" id="input-sns" placeholder="@ID">
+            </div>
+
+            <div class="input-group">
+                <label><i class="fa-regular fa-image"></i> アイコン画像（任意）</label>
+                <!-- カスタムファイルボタン -->
+                <input type="file" id="image-upload" accept="image/*">
+                <label for="image-upload" class="file-upload-label">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> 画像を選択
+                </label>
+                <span id="file-name-display" class="file-name-display">（選択されていません）</span>
+            </div>
+
+            <div class="action-buttons">
+                <button id="btn-save"><i class="fa-solid fa-camera"></i> 保存</button>
+                <button id="btn-share"><i class="fa-solid fa-share-nodes"></i> 共有</button>
+            </div>
+        </div>
+
+        <!-- プレビューエリア -->
+        <div class="preview-area">
+            <div id="meishi-card" class="style-sweet">
+                <!-- 装飾用要素 -->
+                <div class="deco-tl">🎀</div>
+                <div class="deco-br">🎀</div>
+                <div class="deco-tr">✝</div>
+                <div class="deco-sticker">NO LIFE NO OSHI</div>
+
+                <div class="meishi-header">
+                    <div class="oshi-name" id="card-oshi">推しの名前</div>
+                    <div class="role-badge" id="card-role">担当 / 属性</div>
+                </div>
+
+                <div class="main-content">
+                    <div class="my-icon">
+                        <img id="card-icon-img" style="display:none;">
+                        <span id="card-icon-placeholder">♥</span>
+                    </div>
+                    <div class="text-info">
+                        <div class="my-name" id="card-myname">名前</div>
+                        <div class="intro-text" id="card-intro">ここに自己紹介が入ります。</div>
+                        <div class="sns-id"><i class="fa-brands fa-twitter"></i> <span id="card-sns">@ID</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- スマホ用長押し保存エリア -->
+    <div id="longpressSaveArea"></div>
+
+    <!-- フッター -->
+    <div class="footer-content">
+        <!-- 楽天アフィ -->
+        <div class="rakuten">
+            <a href="https://hb.afl.rakuten.co.jp/hsc/4e9240a2.33577567.3d95c766.8a7897b5/?link_type=pict&ut=eyJwYWdlIjoic2hvcCIsInR5cGUiOiJwaWN0IiwiY29sIjoxLCJjYXQiOiI4NSIsImJhbiI6NDc4OTczLCJhbXAiOmZhbHNlfQ%3D%3D" target="_blank" rel="nofollow sponsored noopener" style="word-wrap:break-word;">
+                <img src="https://hbb.afl.rakuten.co.jp/hsb/4e9240a2.33577567.3d95c766.8a7897b5/?me_id=1&me_adv_id=478973&t=pict" border="0" style="margin:2px; max-width:100%; height:auto; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.05);" alt="" title="">
+            </a>
+        </div>
+
+        <!-- TOPへ戻る -->
+        <div class="backtop">
+            <a href="https://mofu-mitsu.github.io/">
+                <i class="fa-solid fa-house"></i> もふみつ工房 TOPへ戻る
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const card = document.getElementById('meishi-card');
+        const inputs = {
+            style: document.getElementById('input-style'),
+            color: document.getElementById('input-color'),
+            oshi: document.getElementById('input-oshi'),
+            role: document.getElementById('input-role'),
+            myname: document.getElementById('input-myname'),
+            intro: document.getElementById('input-intro'),
+            sns: document.getElementById('input-sns'),
+            image: document.getElementById('image-upload')
+        };
+        const outputs = {
+            oshi: document.getElementById('card-oshi'),
+            role: document.getElementById('card-role'),
+            myname: document.getElementById('card-myname'),
+            intro: document.getElementById('card-intro'),
+            sns: document.getElementById('card-sns'),
+            iconImg: document.getElementById('card-icon-img'),
+            iconPlaceholder: document.getElementById('card-icon-placeholder')
+        };
+        const fileNameDisplay = document.getElementById('file-name-display');
+
+        // 色を薄くする関数（量産型の背景用）
+        function lightenColor(hex, amount) {
+            let r = parseInt(hex.substring(1, 3), 16);
+            let g = parseInt(hex.substring(3, 5), 16);
+            let b = parseInt(hex.substring(5, 7), 16);
+
+            r = Math.min(255, Math.floor(r + (255 - r) * amount));
+            g = Math.min(255, Math.floor(g + (255 - g) * amount));
+            b = Math.min(255, Math.floor(b + (255 - b) * amount));
+
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function updateCard() {
+            // クラスの切り替え
+            card.className = inputs.style.value;
+            
+            // 色の更新
+            const mainColor = inputs.color.value;
+            card.style.setProperty('--main-color', mainColor);
+            
+            // サブカラー（薄い色）の計算と更新
+            const subColor = lightenColor(mainColor, 0.9); // 90%白に近づける
+            card.style.setProperty('--sub-color', subColor);
+            
+            // テキスト更新
+            outputs.oshi.innerText = inputs.oshi.value || '推しの名前';
+            outputs.role.innerText = inputs.role.value || '担当 / 属性';
+            outputs.myname.innerText = inputs.myname.value || '名前';
+            outputs.intro.innerText = inputs.intro.value || 'ここに自己紹介が入ります。\n同担拒否 / リアコ / etc...';
+            outputs.sns.innerText = inputs.sns.value || '@ID';
+        }
+
+        // イベントリスナー
+        Object.values(inputs).forEach(input => {
+            if(input !== inputs.image) {
+                input.addEventListener('input', updateCard);
+            }
+        });
+
+        // 画像アップロード
+        inputs.image.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileNameDisplay.innerText = "選択中: " + file.name;
+                fileNameDisplay.style.color = "#d65d7a";
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    outputs.iconImg.src = event.target.result;
+                    outputs.iconImg.style.display = 'block';
+                    outputs.iconPlaceholder.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                fileNameDisplay.innerText = "（選択されていません）";
+                fileNameDisplay.style.color = "#aaa";
+            }
+        });
+
+        // 初期化
+        updateCard();
+
+        // 保存機能
+        document.getElementById('btn-save').addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 生成中...';
+            btn.disabled = true;
+
+            html2canvas(document.getElementById('meishi-card'), {
+                scale: 3, 
+                backgroundColor: null,
+                useCORS: true
+            }).then(canvas => {
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                if (!isMobile) {
+                    const link = document.createElement('a');
+                    link.download = `oshi-meishi-${Date.now()}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } else {
+                    const area = document.getElementById('longpressSaveArea');
+                    area.style.display = 'block';
+                    area.innerHTML = '<p style="color:#d65d7a;font-weight:bold;margin-bottom:10px;">👇 画像を長押しして「写真に保存」してね♡</p>';
+                    const img = new Image();
+                    img.src = canvas.toDataURL('image/png');
+                    img.style.maxWidth = '100%';
+                    img.style.borderRadius = '10px';
+                    img.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+                    area.appendChild(img);
+                    area.scrollIntoView({behavior: 'smooth'});
+                }
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        });
+
+        // 共有機能
+        document.getElementById('btn-share').addEventListener('click', async function() {
+            const shareData = {
+                title: '推し名刺ジェネレーター',
+                text: `【${inputs.role.value || '担当'}】\n${inputs.oshi.value || '推し'}の名刺を作ったよ🎀\n#推し名刺ジェネレーター`,
+                url: location.href
+            };
+            if (navigator.share) {
+                try { await navigator.share(shareData); } catch (err) {}
+            } else {
+                alert('URLをコピーしました！');
+                navigator.clipboard.writeText(location.href);
+            }
+        });
+    </script>
+</body>
+</html>
